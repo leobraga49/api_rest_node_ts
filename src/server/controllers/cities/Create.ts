@@ -1,37 +1,27 @@
 /* eslint-disable prefer-const */
-import { StatusCodes } from 'http-status-codes';
-import { Request, RequestHandler, Response } from 'express';
+import { Request, Response } from 'express';
 import * as yup from 'yup';
+
+import { validation } from '../../shared/middleware';
 
 interface ICity {
     name: string;
     state: string;
 }
+interface IFilter {
+    filter?: string;
+}
+export const createValidation = validation((getSchema) => ({
+    body: getSchema<ICity>(yup.object().shape({
+        name: yup.string().required().min(3),
+        state: yup.string().required().min(3)
+    })),
+    query: getSchema<IFilter>(yup.object().shape({
+        filter: yup.string().required().min(3),
+    })),
+}));
 
-const bodyValidation: yup.ObjectSchema<ICity> = yup.object().shape({
-    name: yup.string().required().min(3),
-    state: yup.string().required().min(3),
-});
-
-export const creeateBodyValidator:RequestHandler = async (req, res, next) => {
-    try {
-        await bodyValidation.validate(req.body, { abortEarly: false });
-        return next();
-    } catch (err) {
-        const yupError = err as yup.ValidationError;
-        const errors: Record<string, string> = {};
-
-        yupError.inner.forEach((error) => {
-            if (!error.path) return;
-
-            errors[error.path] = error.message;
-        });
-
-        return res.status(StatusCodes.BAD_REQUEST).json({ errors });
-    }
-};
-
-export const create = async (req: Request<{}, {}, ICity>, res: Response) => {    
+export const create = async (req: Request<{}, {}, ICity>, res: Response) => {
     console.log(req.body);
 
     return res.send('Create!');

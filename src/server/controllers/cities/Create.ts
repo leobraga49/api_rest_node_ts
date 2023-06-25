@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { StatusCodes } from 'http-status-codes';
-import { Request, Response } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import * as yup from 'yup';
 
 interface ICity {
@@ -10,15 +10,13 @@ interface ICity {
 
 const bodyValidation: yup.ObjectSchema<ICity> = yup.object().shape({
     name: yup.string().required().min(3),
-    state: yup.string().required(),
+    state: yup.string().required().min(3),
 });
 
-export const create = async (req: Request<{}, {}, ICity>, res: Response) => {
-    let validatedData: ICity | undefined = undefined;
-
+export const creeateBodyValidator:RequestHandler = async (req, res, next) => {
     try {
         await bodyValidation.validate(req.body, { abortEarly: false });
-
+        return next();
     } catch (err) {
         const yupError = err as yup.ValidationError;
         const errors: Record<string, string> = {};
@@ -31,8 +29,10 @@ export const create = async (req: Request<{}, {}, ICity>, res: Response) => {
 
         return res.status(StatusCodes.BAD_REQUEST).json({ errors });
     }
+};
 
-    console.log(validatedData);
+export const create = async (req: Request<{}, {}, ICity>, res: Response) => {    
+    console.log(req.body);
 
     return res.send('Create!');
 };

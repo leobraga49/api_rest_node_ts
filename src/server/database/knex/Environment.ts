@@ -1,16 +1,17 @@
 import { Knex } from 'knex';
+import path from 'path';
 
 export const development: Knex.Config = {
     client: 'sqlite3',
     useNullAsDefault: true,
     connection: {
-        filename: './src/server/database/knex/db.sqlite',
+        filename: path.resolve(__dirname, '..', '..', '..', '..', 'database.sqlite')
     },
     migrations: {
-        directory: './src/server/database/knex/migrations',
+        directory: path.resolve(__dirname, '..', 'migrations'),
     },
     seeds: {
-        directory: './src/server/database/knex/seeds',
+        directory: path.resolve(__dirname, '..', 'seeds'),
     },
     pool: {
         afterCreate: (conn: any, cb: Function) => {
